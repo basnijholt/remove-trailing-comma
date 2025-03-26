@@ -26,6 +26,18 @@ Sample `.pre-commit-config.yaml`:
     -   id: add-trailing-comma
 ```
 
+### With the `--remove-comma` option
+
+To remove trailing commas instead of adding them, you can use the `--remove-comma` option:
+
+```yaml
+-   repo: https://github.com/asottile/add-trailing-comma
+    rev: v3.1.0
+    hooks:
+    -   id: add-trailing-comma
+        args: [--remove-comma]
+```
+
 ## multi-line method invocation style -- why?
 
 ```python

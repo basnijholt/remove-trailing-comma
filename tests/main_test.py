@@ -106,3 +106,93 @@ def test_main_exit_zero_even_if_changed(tmpdir):
     assert not main((str(f), '--exit-zero-even-if-changed'))
     assert f.read() == 'x(\n    1,\n)'
     assert not main((str(f), '--exit-zero-even-if-changed'))
+
+
+def test_main_remove_comma(tmpdir, capsys):
+    f = tmpdir.join('f.py')
+    f.write('x(\n    1,\n    2,\n)\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    _, err = capsys.readouterr()
+    assert err == f'Rewriting {f}\n'
+    assert f.read() == 'x(\n    1,\n    2\n)\n'
+
+
+def test_main_remove_comma_function_args(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write('def f(\n    arg1,\n    arg2,\n): pass\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == 'def f(\n    arg1,\n    arg2\n): pass\n'
+
+
+def test_main_preserve_single_tuple_comma(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write('single = (1,)\n\nmulti = (1, 2,)\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == 'single = (1,)\n\nmulti = (1, 2)\n'
+
+
+def test_main_remove_comma_imports(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write('from math import (\n    sin,\n)\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == 'from math import (\n    sin\n)\n'
+
+
+def test_main_remove_comma_function_params(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write('def func(\n    x,\n):\n    pass\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == 'def func(\n    x\n):\n    pass\n'
+
+
+def test_main_remove_comma_class_method(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write('class C:\n    def method(\n        self,\n    ):\n        pass\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == 'class C:\n    def method(\n        self\n    ):\n        pass\n'
+
+
+def test_main_remove_comma_function_call(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write('result = func(\n    arg,\n)\n')
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == 'result = func(\n    arg\n)\n'
+
+
+def test_main_multiple_constructs(tmpdir):
+    f = tmpdir.join('f.py')
+    f.write(
+        '# Single-element tuple - should keep the comma\n'
+        'single_tuple = (1,)\n\n'
+        '# Import with parentheses - should remove the comma\n'
+        'from math import (\n'
+        '    sin,\n'
+        ')\n\n'
+        '# Function with single parameter - should remove the comma\n'
+        'def func_single(\n'
+        '    x,\n'
+        '):\n'
+        '    pass\n\n'
+        '# Function call with single arg - should remove the comma\n'
+        'result = func_single(\n'
+        '    "arg",\n'
+        ')\n',
+    )
+    assert main((f.strpath, '--remove-comma')) == 1
+    assert f.read() == (
+        '# Single-element tuple - should keep the comma\n'
+        'single_tuple = (1,)\n\n'
+        '# Import with parentheses - should remove the comma\n'
+        'from math import (\n'
+        '    sin\n'
+        ')\n\n'
+        '# Function with single parameter - should remove the comma\n'
+        'def func_single(\n'
+        '    x\n'
+        '):\n'
+        '    pass\n\n'
+        '# Function call with single arg - should remove the comma\n'
+        'result = func_single(\n'
+        '    "arg"\n'
+        ')\n'
+    )
