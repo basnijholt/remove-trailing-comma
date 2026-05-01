@@ -100,3 +100,19 @@ def test_remove_comma_noops_when_last_item_has_no_comma():
 def test_remove_comma_noops_on_syntax_error():
     src = 'print 1\n'
     assert _fix_src(src, remove_comma=True) == src
+
+
+def test_remove_comma_preserves_fstring_format_spec_commas():
+    src = (
+        'tokens = 1234\n'
+        'message = f"{tokens:,}"\n'
+        'size = f"Size: {len(message):,} bytes"\n'
+        'value = f"{foo(1,)}"\n'
+    )
+    expected = (
+        'tokens = 1234\n'
+        'message = f"{tokens:,}"\n'
+        'size = f"Size: {len(message):,} bytes"\n'
+        'value = f"{foo(1)}"\n'
+    )
+    assert _fix_src(src, remove_comma=True) == expected
