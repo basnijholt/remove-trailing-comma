@@ -1,18 +1,18 @@
 [![build status](https://github.com/basnijholt/remove-trailing-comma/actions/workflows/main.yml/badge.svg)](https://github.com/basnijholt/remove-trailing-comma/actions/workflows/main.yml)
 
-add-trailing-comma
-==================
+remove-trailing-comma
+=====================
 
-A tool (and pre-commit hook) to automatically add trailing commas to calls and
-literals.  This fork also supports removing optional trailing commas with
-`--remove-comma`.
+A tool (and pre-commit hook) to automatically remove optional trailing commas
+from calls and literals while preserving commas required for Python semantics.
+It also keeps the original `add-trailing-comma` command for adding commas.
 
 ## Installation
 
 Python 3.12 or newer is required.
 
 ```bash
-pip install git+https://github.com/basnijholt/remove-trailing-comma
+pip install remove-trailing-comma
 ```
 
 ## As a pre-commit hook
@@ -25,26 +25,13 @@ Sample `.pre-commit-config.yaml`:
 -   repo: https://github.com/basnijholt/remove-trailing-comma
     rev: main
     hooks:
-    -   id: add-trailing-comma
-```
-
-### With the `--remove-comma` option
-
-To remove optional trailing commas instead of adding them, use
-`--remove-comma`:
-
-```yaml
--   repo: https://github.com/basnijholt/remove-trailing-comma
-    rev: main
-    hooks:
-    -   id: add-trailing-comma
-        args: [--remove-comma]
+    -   id: remove-trailing-comma
 ```
 
 From the command line:
 
 ```bash
-add-trailing-comma --remove-comma path/to/file.py
+remove-trailing-comma path/to/file.py
 ```
 
 The remove mode preserves commas that are required for Python semantics, such
@@ -55,6 +42,25 @@ as one-element tuples:
 -y = [1, 2,]
 +y = [1, 2]
 ```
+
+### Adding trailing commas
+
+To add trailing commas instead, use the `add-trailing-comma` hook:
+
+```yaml
+-   repo: https://github.com/basnijholt/remove-trailing-comma
+    rev: main
+    hooks:
+    -   id: add-trailing-comma
+```
+
+From the command line:
+
+```bash
+add-trailing-comma path/to/file.py
+```
+
+The legacy `add-trailing-comma --remove-comma` form is still supported.
 
 ## multi-line method invocation style -- why?
 
@@ -264,8 +270,6 @@ This has the following benefits:
 ```
 
 ### remove unnecessary commas
-
-yes yes, I realize the tool is called `add-trailing-comma` :laughing:
 
 ```diff
 -[1, 2, 3,]

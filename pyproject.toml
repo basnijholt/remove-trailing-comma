@@ -3,9 +3,9 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "add_trailing_comma"
+name = "remove-trailing-comma"
 version = "3.1.0"
-description = "Automatically add trailing commas to calls and literals"
+description = "Automatically add or remove trailing commas from calls and literals"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -31,6 +31,7 @@ Homepage = "https://github.com/basnijholt/remove-trailing-comma"
 
 [project.scripts]
 add-trailing-comma = "add_trailing_comma._main:main"
+remove-trailing-comma = "add_trailing_comma._main:remove_main"
 
 [dependency-groups]
 dev = [

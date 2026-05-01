@@ -199,7 +199,11 @@ def fix_file(filename: str, args: argparse.Namespace) -> int:
         return contents_text != contents_text_orig
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def _main(
+        argv: Sequence[str] | None = None,
+        *,
+        remove_comma: bool = False,
+) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filenames', nargs='*')
     parser.add_argument('--exit-zero-even-if-changed', action='store_true')
@@ -208,7 +212,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--remove-comma',
         action='store_true',
-        help='Remove trailing commas instead of adding them',
+        default=remove_comma,
+        help=(
+            argparse.SUPPRESS if remove_comma else
+            'Remove trailing commas instead of adding them'
+        ),
     )
     args = parser.parse_args(argv)
 
@@ -219,6 +227,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     for filename in args.filenames:
         ret |= fix_file(filename, args)
     return ret
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    return _main(argv)
+
+
+def remove_main(argv: Sequence[str] | None = None) -> int:
+    return _main(argv, remove_comma=True)
 
 
 if __name__ == '__main__':

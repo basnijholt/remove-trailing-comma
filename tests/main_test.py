@@ -1,14 +1,50 @@
 from __future__ import annotations
 
 import io
+import pathlib
 import sys
+import tomllib
 from unittest import mock
 
 from add_trailing_comma._main import main
+from add_trailing_comma._main import remove_main
 
 
 def test_main_trivial():
     assert main(()) == 0
+
+
+def test_remove_main_trivial():
+    assert remove_main(()) == 0
+
+
+def test_project_defines_remove_trailing_comma_script():
+    pyproject = tomllib.loads(
+        pathlib.Path('pyproject.toml').read_text(encoding='UTF-8'),
+    )
+    assert pyproject['project']['name'] == 'remove-trailing-comma'
+    assert pyproject['project']['scripts']['remove-trailing-comma'] == (
+        'add_trailing_comma._main:remove_main'
+    )
+
+
+def test_project_defines_remove_trailing_comma_hook():
+    hooks_text = pathlib.Path('.pre-commit-hooks.yaml').read_text(
+        encoding='UTF-8',
+    )
+    assert '-   id: remove-trailing-comma\n' in hooks_text
+    assert 'entry: remove-trailing-comma\n' in hooks_text
+
+
+def test_release_workflow_uses_trusted_publishing():
+    workflow = pathlib.Path('.github/workflows/release.yml')
+    assert workflow.is_file()
+    workflow_text = workflow.read_text(encoding='UTF-8')
+    assert 'environment: pypi' in workflow_text
+    assert 'id-token: write' in workflow_text
+    assert 'needs: checks' in workflow_text
+    assert 'uv build --python 3.12' in workflow_text
+    assert 'pypa/gh-action-pypi-publish@release/v1' in workflow_text
 
 
 def test_main_noop(tmpdir):
@@ -112,6 +148,15 @@ def test_main_remove_comma(tmpdir, capsys):
     f = tmpdir.join('f.py')
     f.write('x(\n    1,\n    2,\n)\n')
     assert main((f.strpath, '--remove-comma')) == 1
+    _, err = capsys.readouterr()
+    assert err == f'Rewriting {f}\n'
+    assert f.read() == 'x(\n    1,\n    2\n)\n'
+
+
+def test_remove_main_removes_comma_without_flag(tmpdir, capsys):
+    f = tmpdir.join('f.py')
+    f.write('x(\n    1,\n    2,\n)\n')
+    assert remove_main((f.strpath,)) == 1
     _, err = capsys.readouterr()
     assert err == f'Rewriting {f}\n'
     assert f.read() == 'x(\n    1,\n    2\n)\n'
