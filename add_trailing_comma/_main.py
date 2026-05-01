@@ -87,7 +87,7 @@ def _remove_optional_comma(tokens: list[Token], fix: Fix) -> None:
     while i > first_brace and tokens[i].name in NON_CODING_TOKENS:
         i -= 1
 
-    if tokens[i].src != ',':
+    if tokens[i].name != 'OP' or tokens[i].src != ',':
         return
     elif fix.remove_comma:
         del tokens[i:last_brace]
