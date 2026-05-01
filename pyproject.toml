@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "add_trailing_comma"
+version = "3.1.0"
+description = "Automatically add trailing commas to calls and literals"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Anthony Sottile", email = "asottile@umich.edu" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "tokenize-rt>=3.0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/basnijholt/remove-trailing-comma"
+
+[project.scripts]
+add-trailing-comma = "add_trailing_comma._main:main"
+
+[dependency-groups]
+dev = [
+    "covdefaults>=2.1",
+    "coverage",
+    "pre-commit",
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+exclude = [
+    "testing*",
+    "tests*",
+]
+
+[tool.coverage.run]
+plugins = ["covdefaults"]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+python_version = "3.12"
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "testing.*",
+    "tests.*",
+]
+disallow_untyped_defs = false
