@@ -149,7 +149,9 @@ def test_main_remove_comma_class_method(tmpdir):
     f = tmpdir.join('f.py')
     f.write('class C:\n    def method(\n        self,\n    ):\n        pass\n')
     assert main((f.strpath, '--remove-comma')) == 1
-    assert f.read() == 'class C:\n    def method(\n        self\n    ):\n        pass\n'
+    assert f.read() == (
+        'class C:\n    def method(\n        self\n    ):\n        pass\n'
+    )
 
 
 def test_main_remove_comma_function_call(tmpdir):

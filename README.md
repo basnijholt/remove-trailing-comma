@@ -1,16 +1,18 @@
-[![build status](https://github.com/asottile/add-trailing-comma/actions/workflows/main.yml/badge.svg)](https://github.com/asottile/add-trailing-comma/actions/workflows/main.yml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/asottile/add-trailing-comma/main.svg)](https://results.pre-commit.ci/latest/github/asottile/add-trailing-comma/main)
+[![build status](https://github.com/basnijholt/remove-trailing-comma/actions/workflows/main.yml/badge.svg)](https://github.com/basnijholt/remove-trailing-comma/actions/workflows/main.yml)
 
 add-trailing-comma
 ==================
 
 A tool (and pre-commit hook) to automatically add trailing commas to calls and
-literals.
+literals.  This fork also supports removing optional trailing commas with
+`--remove-comma`.
 
 ## Installation
 
+Python 3.12 or newer is required.
+
 ```bash
-pip install add-trailing-comma
+pip install git+https://github.com/basnijholt/remove-trailing-comma
 ```
 
 ## As a pre-commit hook
@@ -20,22 +22,38 @@ See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
 Sample `.pre-commit-config.yaml`:
 
 ```yaml
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
+-   repo: https://github.com/basnijholt/remove-trailing-comma
+    rev: main
     hooks:
     -   id: add-trailing-comma
 ```
 
 ### With the `--remove-comma` option
 
-To remove trailing commas instead of adding them, you can use the `--remove-comma` option:
+To remove optional trailing commas instead of adding them, use
+`--remove-comma`:
 
 ```yaml
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
+-   repo: https://github.com/basnijholt/remove-trailing-comma
+    rev: main
     hooks:
     -   id: add-trailing-comma
         args: [--remove-comma]
+```
+
+From the command line:
+
+```bash
+add-trailing-comma --remove-comma path/to/file.py
+```
+
+The remove mode preserves commas that are required for Python semantics, such
+as one-element tuples:
+
+```diff
+ x = (1,)
+-y = [1, 2,]
++y = [1, 2]
 ```
 
 ## multi-line method invocation style -- why?
@@ -187,7 +205,7 @@ This has the following benefits:
 ```
 
 
-### trailling comma for PEP-695 type aliases
+### trailing comma for PEP-695 type aliases
 
 ```diff
  def f[
@@ -254,4 +272,16 @@ yes yes, I realize the tool is called `add-trailing-comma` :laughing:
 -[1, 2, 3, ]
 +[1, 2, 3]
 +[1, 2, 3]
+```
+
+## Development
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management
+and CI.
+
+```bash
+uv sync --dev
+uv run coverage run -m pytest tests
+uv run coverage report
+uv run pre-commit run --all-files
 ```

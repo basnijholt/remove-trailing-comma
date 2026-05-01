@@ -7,13 +7,47 @@ on:
   pull_request:
 
 jobs:
-  main-windows:
-    uses: asottile/workflows/.github/workflows/tox.yml@v1.8.1
-    with:
-      env: '["py39"]'
-      os: windows-latest
-  main-linux:
-    uses: asottile/workflows/.github/workflows/tox.yml@v1.8.1
-    with:
-      env: '["py39", "py310", "py311", "py312"]'
-      os: ubuntu-latest
+  tests:
+    name: tests (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        -   os: ubuntu-latest
+            python-version: '3.12'
+        -   os: ubuntu-latest
+            python-version: '3.13'
+        -   os: ubuntu-latest
+            python-version: '3.14'
+        -   os: windows-latest
+            python-version: '3.12'
+    steps:
+    -   uses: actions/checkout@v6
+    -   name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+    -   name: Install
+        run: uv sync --locked --dev --python ${{ matrix.python-version }}
+    -   name: Test
+        run: |
+          uv run --python ${{ matrix.python-version }} coverage erase
+          uv run --python ${{ matrix.python-version }} coverage run -m pytest tests
+          uv run --python ${{ matrix.python-version }} coverage report
+
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+    -   uses: actions/checkout@v6
+    -   name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          python-version: '3.12'
+    -   name: Install
+        run: uv sync --locked --dev --python 3.12
+    -   name: Run pre-commit
+        run: uv run --python 3.12 pre-commit run --all-files --show-diff-on-failure
